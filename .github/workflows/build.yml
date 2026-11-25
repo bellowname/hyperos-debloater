@@ -6,6 +6,10 @@ on:
   release:
     types: [published]
 
+# Нужно, чтобы при публикации релиза workflow мог прикрепить zip к нему.
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
