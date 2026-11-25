@@ -1,38 +1,90 @@
-name: Сообщение о проблеме
-description: Что-то отключилось не так или модуль не работает
+name: Bug report
+description: Something stopped working or the module did not apply a profile
 title: "[Bug]: "
 labels: [bug]
 body:
+  - type: dropdown
+    id: root_solution
+    attributes:
+      label: Root solution
+      description: Which manager was used to install the module
+      options:
+        - Magisk
+        - KernelSU
+        - APatch
+        - Other / not sure
+    validations:
+      required: true
+
+  - type: input
+    id: module_version
+    attributes:
+      label: Module version
+      placeholder: "1.1.1"
+    validations:
+      required: true
+
   - type: input
     id: device
     attributes:
-      label: Устройство и прошивка
-      placeholder: Redmi Note 12 (tapas), HyperOS 2.0.209, Android 15
+      label: Device / ROM / region
+      placeholder: "Redmi Note 12 (tapas), HyperOS 2.0.209 Global, Android 15"
     validations:
       required: true
-  - type: input
+
+  - type: dropdown
     id: profile
     attributes:
-      label: Активный профиль
-      placeholder: safe / balanced / aggressive
+      label: Active profile
+      options:
+        - safe
+        - balanced
+        - aggressive
+        - unknown
     validations:
       required: true
+
   - type: textarea
     id: what
     attributes:
-      label: Что случилось
-      description: Что перестало работать и когда
+      label: What happened
+      description: What broke, and after which action or reboot
     validations:
       required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: false
+
   - type: textarea
     id: log
     attributes:
-      label: Содержимое /data/adb/hyperos_debloater/log.txt
+      label: "/data/adb/hyperos_debloater/log.txt"
+      description: Please include the lines around PM DISABLE FAIL / PM ENABLE FAIL, if any
       render: shell
     validations:
       required: false
+
   - type: textarea
     id: report
     attributes:
-      label: Отчёт scan.sh (если есть)
+      label: "scan.sh report"
+      description: "Content of /sdcard/Download/hyperos-debloater-packages.txt"
       render: shell
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Before submitting
+      options:
+        - label: I made a backup
+          required: true
+        - label: I tried dry-run first
+          required: false
+        - label: I read README troubleshooting
+          required: false

@@ -1,150 +1,148 @@
 # HyperOS Debloater (Safe Profiles)
 
-[English README](README.md) · [Русская версия](README_RU.md)
-
-[![build](https://github.com/bellowname/hyperos-debloater/actions/workflows/build.yml/badge.svg)](https://github.com/bellowname/hyperos-debloater/actions/workflows/build.yml)
+[![Release](https://img.shields.io/github/v/release/bellowname/hyperos-debloater?display_name=tag)](https://github.com/bellowname/hyperos-debloater/releases/latest)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+![Magisk](https://img.shields.io/badge/Magisk-проверен-orange)
+![KernelSU](https://img.shields.io/badge/KernelSU-не_проверен-lightgrey)
+![APatch](https://img.shields.io/badge/APatch-не_проверен-lightgrey)
+![HyperOS](https://img.shields.io/badge/HyperOS-1.x%2F2.x-blue)
 
-Magisk-модуль для Xiaomi / Redmi / POCO на HyperOS и MIUI. Отключает рекламные,
-рекомендательные и аналитические сервисы — **без удаления системных приложений** и
-с гарантированным возвратом при uninstall.
+[English README](README.md) · [Список пакетов](docs/PACKAGES.md) · [Безопасность](SECURITY.md)
 
-## Зачем ещё один debloater
+**HyperOS debloater для Xiaomi, Redmi и POCO: безопасно отключает рекламу, аналитику и лишние сервисы через `pm disable-user`, а не удаляет системные приложения.**
 
-- **Ничего не удаляется.** Только `pm disable-user`, всё восстанавливается командой `pm enable`.
-- **Три профиля**: `safe` → `balanced` → `aggressive`, переключаются кнопкой Action в Magisk или в WebUI.
-- **WebUI** (с 1.1.0): выбор профиля, выключатели пакетов, whitelist, dry-run и лог — через приложение
-  [KsuWebUI](https://github.com/5ec1cff/KsuWebUIStandalone). Работает с Magisk, KernelSU и APatch.
-- **Whitelist**-critical пакетов (`home`, `keyguard`, `securitycenter`, `theme`, `backup`, …)
-  защищает устройство даже от ошибок в профиле.
-- **Сухой прогон** (`dry-run`): сначала смотришь, что модуль *собирается* отключить.
-- **Отчёт сканера**: список реально найденных на твоём устройстве пакетов.
-- **Автовозврат**: при удалении модуля `uninstall.sh` включает всё отключённое им.
-- Работает на любом ROM: на не-Xiaomi просто ничего не находит и не трогает систему.
+Это **Magisk-модуль** для устройств с root. Он не удаляет приложения и не трогает `/system`: только меняет состояние пакетов и умеет всё вернуть при удалении. Три профиля (`safe`, `balanced`, `aggressive`), защищённый whitelist, dry-run и офлайн-WebUI делают процесс проверяемым и обратимым.
+
+> Root обязателен. Это **не** решение «debloat без root».
+
+![HyperOS Debloater WebUI](docs/screenshots/webui.jpg)
+
+## Что это и чем отличается от удаления приложений
+
+Системные пакеты Xiaomi нельзя просто удалить из настроек, а удаление из `/system` опасно и ломает OTA. Модуль:
+
+- выполняет `pm disable-user --user 0 <package>` для фиксированного списка;
+- не удаляет APK и не чистит данные приложений;
+- запоминает всё, что отключил;
+- включает пакеты обратно при удалении модуля;
+- защищает критичные приложения whitelist-ом, даже если они есть в профиле.
+
+Точный список — в [docs/PACKAGES.md](docs/PACKAGES.md).
+
+## Безопасность
+
+| Свойство | Как реализовано |
+|---|---|
+| Без изменений `/system` | Меняется только состояние пакетов; файлы модуля лежат в `/data/adb/hyperos_debloater` |
+| Обратимость | `uninstall.sh` выполняет `pm enable` для пакетов из `applied.txt` и `custom.txt` |
+| Защищённые компоненты | Лаунчер, экран блокировки, Security Center, Security Core, Theme, Backup, Face, Gallery, Wallet, Find Device, Smart Home и `com.google.android.gms` — в whitelist по умолчанию |
+| Предпросмотр | Файл `dry-run` или переключатель в WebUI: действия пишутся в лог, но не применяются |
+| Без телеметрии | WebUI — локальная страница, модуль не делает сетевых запросов |
+| Видимость ошибок | Настоящие ошибки `pm` пишутся в `log.txt` как `PM DISABLE FAIL ...` |
+
+Профиль по умолчанию — `safe`. Начни с него, запусти сканер и только потом думай о `balanced` или `aggressive`.
+
+## Поддержка
+
+Проверено автором только то, что указано ниже. Остальное помечено как требующее тестирования.
+
+| Что | Статус | Примечание |
+|---|---|---|
+| Устройство | Redmi Note 12, кодовое имя `tapas` | Проверено |
+| HyperOS | 2.0.209.0 | Проверено |
+| Android | 15 | Проверено |
+| Root / формат модуля | Magisk | Проверено на v1.1.1 |
+| KernelSU | **Требует тестирования** | Скрипты в формате Magisk; автор не проверял |
+| APatch | **Требует тестирования** | Скрипты в формате Magisk; автор не проверял |
+| WebUI | KsuWebUI Standalone | Нужен отдельно; само приложение поддерживает Magisk / KernelSU / APatch |
+| Другие HyperOS 1.x/2.x | **Требует тестирования** | Код проверяет только имена пакетов, без привязки к модели |
+| Другие версии Android | **Требует тестирования** | Синтаксис `pm` может отличаться |
+| AOSP-подобные прошивки | Ожидается «ничего не делать» | Кандидаты Xiaomi не найдутся; отдельно не тестировалось |
 
 ## Установка
 
-1. Скачай `hyperos-debloater.zip` из раздела **Releases**.
+1. Скачай `hyperos-debloater.zip` из [Releases](https://github.com/bellowname/hyperos-debloater/releases/latest).
 2. Magisk → Модули → **Установить с устройства** → выбери zip → перезагрузка.
-3. После загрузки открой модуль и нажми **Action**, чтобы сменить профиль
-   (`safe` → `balanced` → `aggressive` → `safe`).
-4. Для красивого меню поставь [KsuWebUI](https://github.com/5ec1cff/KsuWebUIStandalone/releases)
-   и открой **HyperOS Debloater** в списке модулей.
-
-По умолчанию активен `safe`.
-
-## WebUI (рекомендуется)
-
-Встроенного WebUI в Magisk нет, поэтому используется отдельное приложение
-[KsuWebUIStandalone](https://github.com/5ec1cff/KsuWebUIStandalone) от 5ec1cff.
-После установки модуля он появится в списке приложения — достаточно нажать на него.
-
-![Меню HyperOS Debloater в KsuWebUI](docs/screenshots/webui.jpg)
-
-Что можно сделать в меню:
-
-- выбрать профиль `safe` / `balanced` / `aggressive` одной кнопкой;
-- включить/выключить конкретный пакет — выбор сохранится в `custom.txt` после перезагрузки;
-- нажать ★, чтобы навсегда исключить пакет (добавить в `whitelist.txt`);
-- включить «сухой прогон» и посмотреть лог перед применением;
-- запустить сканер и прочитать отчёт прямо в окне;
-- вернуть все пакеты кнопкой «Всё вернуть» (нужно нажать дважды).
-
-Страница целиком лежит в модуле (`webroot/index.html`), не требует интернета и не
-отправляет телеметрию. Все команды идут через защищённый бэкенд
-`scripts/webui.sh`, который принимает только известные имена пакетов.
+   В KernelSU / APatch порядок действий может отличаться и автором не проверен.
+3. После загрузки автоматически применяется профиль `safe`.
+4. Необязательно: поставь [KsuWebUI Standalone](https://github.com/5ec1cff/KsuWebUIStandalone/releases) для графического меню.
 
 ## Профили
 
 | Профиль | Что отключает | Риск |
 |---|---|---|
-| `safe` | реклама, аналитика, `yellowpage`, bugreport | минимальный |
-| `balanced` | + GetApps/магазин, браузер, видео, Miracast, сканер | средний — добавь нужное в whitelist |
-| `aggressive` | + Joyose, discover, AOD, обои, голосовой помощник, powerkeeper, gamebooster | выше — часть фирменных фишек может пропасть |
+| `safe` (по умолчанию) | `com.miui.analytics`, `com.miui.systemAdSolution`, `com.miui.msa.global`, `com.miui.yellowpage`, `com.miui.bugreport` | Минимальный: реклама, аналитика, «жёлтые страницы», отчёты об ошибках |
+| `balanced` | Всё из `safe` + браузер, GetApps/магазин, Xiaomi Shop, Mi Video, Miracast, сканер QR, hybrid-сервисы | Средний: встроенные приложения, которыми ты пользуешься, перестанут работать |
+| `aggressive` | Всё из `balanced` + Joyose, Discover, AOD, обои, голосовой помощник, powerkeeper, luckymoney, game booster | Выше: игровые профили, AOD и часть фирменных функций могут пропасть |
 
-Конкретный список и описания — в [docs/PACKAGES.md](docs/PACKAGES.md) и `module/profiles/*.txt`.
+Отсутствующие пакеты пропускаются. Перед выбором более жёсткого профиля запусти сканер.
 
-## Пути и ручное управление
+## WebUI
 
-Все пользовательские файлы лежат в `/data/adb/hyperos_debloater`:
+У Magisk нет встроенного WebUI. Модуль содержит локальную страницу `webroot/index.html`; открой её через **KsuWebUI Standalone** от 5ec1cff.
 
-| Файл | Назначение |
-|---|---|
-| `profile` | имя активного профиля (`safe`, `balanced`, `aggressive`) |
-| `whitelist.txt` | пакеты, которые нельзя трогать |
-| `custom.txt` | пакеты, отключённые вручную через WebUI (переживают перезагрузку) |
-| `applied.txt` | пакеты, отключённые модулем (используется для возврата) |
-| `log.txt` | журнал всех действий с датой и временем |
-| `dry-run` | если файл существует — отключение не применяется, только лог |
+1. Установи KsuWebUI Standalone из раздела Releases проекта.
+2. Разреши root при запросе.
+3. Открой **HyperOS Debloater** в списке модулей.
 
-Примеры команд (Termux, root):
+В WebUI можно переключать профили, включать/выключать отдельные пакеты, править whitelist, включать dry-run, запускать сканер и читать лог. Выбор сохраняется в `custom.txt` и переживает перезагрузку.
+
+## Dry-run
+
+Создай файл-маркер и примени профиль — ничего не отключится, только запишется в лог:
 
 ```sh
-# Посмотреть, какие кандидаты вообще есть на устройстве
-su -c 'sh /data/adb/modules/hyperos_debloater/scripts/scan.sh'
-# Отчёт появится в /sdcard/Download/hyperos-debloater-packages.txt
-
-# Включить сухой прогон и применить
 su -c 'touch /data/adb/hyperos_debloater/dry-run'
 su -c 'sh /data/adb/modules/hyperos_debloater/scripts/apply.sh'
-cat /data/adb/hyperos_debloater/log.txt
-
-# Вернуть сухой прогон обратно
-su -c 'rm /data/adb/hyperos_debloater/dry-run'
-
-# Выбрать профиль вручную и применить
-su -c 'echo balanced > /data/adb/hyperos_debloater/profile'
-su -c 'sh /data/adb/modules/hyperos_debloater/scripts/apply.sh'
-
-# Всё вернуть, не удаляя модуль
-su -c 'sh /data/adb/modules/hyperos_debloater/scripts/restore.sh'
+cat /data/adb/hyperos_debloater/log.txt | grep DRY-RUN
 ```
 
-## Поддерживаемые устройства
-
-Любые устройства на HyperOS 1.x/2.x и MIUI 12+. Разработка и тестирование идут на
-Redmi Note 12 (`tapas`, Snapdragon 685, Android 15 / HyperOS 2.0). На AOSP-подобных
-прошивках модуль просто не находит пакеты Xiaomi и ничего не меняет.
-
-## Вопросы
-
-**Сломался экран/лаунчер?** Открой Magisk → отключи модуль — при удалении все пакеты
-включаются обратно. Если не перезагружается, в recovery удали
-`/data/adb/modules/hyperos_debloater`.
-
-**Модуль ничего не отключил.** Запусти `scan.sh`: возможно, на твоей прошивке другие
-имена пакетов. Пришли отчёт в issue — добавим профиль под твою прошивку.
-
-**В логе `DISABLE FAIL` или `RESTORE FAIL`.** Обновись до 1.1.1: модуль теперь ждёт
-PackageManager после загрузки, повторяет попытку и пишет настоящую ошибку `pm` в лог
-(`PM DISABLE FAIL ...`). Если ошибка останется — пришли строку `PM DISABLE FAIL` из
-`log.txt` в issue.
-
-**Можно ли редактировать профили?** Да, но правильнее добавить нужный пакет в
-`whitelist.txt`: он сохранится при обновлении модуля.
-
-## Roadmap
-
-- [x] WebUI с чекбоксами пакетов (Magisk/KernelSU/APatch через KsuWebUI) — с 1.1.0
-- [ ] Профили под конкретные регионы (Global / CN / EEA / RU)
-- [ ] Обновляемый список кандидатов через `update.json`
-- [ ] Уведомление после применения профиля
-
-## Disclaimer
-
-Модуль меняет состояние системных пакетов. Делай бэкап. Автор не несёт ответственности
-за последствия. Это open source — читай код перед установкой.
-
-## Сборка
+Убери маркер, чтобы изменения применились:
 
 ```sh
-sh scripts/build.sh          # → hyperos-debloater.zip
+su -c 'rm /data/adb/hyperos_debloater/dry-run'
 ```
 
-Репозиторий: `github.com/bellowname/hyperos-debloater`. Если логин изменится,
-поправь его в `module/module.prop`, `update.json`, бейджах README и `LICENSE`.
+Тот же переключатель есть в WebUI.
 
-## License
+## Откат
 
-MIT. Свои пакеты и профили присылай через [CONTRIBUTING.md](CONTRIBUTING.md).
-Если модуль помог — поставь ⭐, это главная мотивация обновлять его.
+- **Оставить модуль:** WebUI → **«Всё вернуть»** (нажать дважды) либо
+  `su -c 'sh /data/adb/modules/hyperos-debloater/scripts/restore.sh'`.
+- **Удалить модуль:** удали его в Magisk. `uninstall.sh` включит пакеты из `applied.txt` и `custom.txt`.
+- **Не загружается:** зайди в recovery и удали `/data/adb/modules/hyperos_debloater`. При необходимости убери файлы-маркеры в `/data/adb/hyperos_debloater`.
+
+## FAQ и устранение неполадок
+
+**Приложение пропало.** Скорее всего, оно отключено профилем. Проверь `applied.txt`, добавь пакет в `whitelist.txt` (или нажми ★ в WebUI), затем выполни `restore.sh`.
+
+**Bootloop.** Удали каталог модуля из recovery. Не применяй `aggressive` на непроверенном устройстве.
+
+**OTA-обновление.** Состояние отключённых пакетов может сброситься; после OTA это не тестировалось. После обновления проверь `log.txt` и при необходимости примени профиль заново.
+
+**SafetyNet / Play Integrity.** Модуль не скрывает root и не обещает исправить Play Integrity. Тесты не проводились.
+
+**HyperOS 2 / `DISABLE FAIL`.** Поставь v1.1.1 или новее: модуль ждёт PackageManager, повторяет попытку и пишет настоящую ошибку. Если строка `PM DISABLE FAIL ...` остаётся — открой issue с этой строкой и отчётом сканера.
+
+**Не-Xiaomi прошивка.** Код ищет конкретные пакеты Xiaomi и пропускает отсутствующие. Привязки к модели нет; ожидается отсутствие изменений, но отдельно не проверялось.
+
+## Скриншоты
+
+Чеклист кадров — в [docs/SCREENSHOTS.md](docs/SCREENSHOTS.md).
+
+Сейчас есть:
+
+1. `docs/screenshots/webui.jpg` — **главный экран WebUI: профили, список пакетов и выключатели**.
+
+Полезные кадры, которых пока нет:
+
+2. Включённый dry-run и строки `DRY-RUN disable ...` в `log.txt`.
+3. Отчёт сканера из `/sdcard/Download/hyperos-debloater-packages.txt`.
+4. WebUI после «Всё вернуть» с логом `RESTORE`.
+5. Страница модуля в Magisk с кнопкой **Action**.
+
+## Лицензия и дисклеймер
+
+MIT — см. [LICENSE](LICENSE). Сообщения об уязвимостях: [SECURITY.md](SECURITY.md). Вклад: [CONTRIBUTING.md](CONTRIBUTING.md).
+
+**Сделай бэкап и сначала используй dry-run.** Модуль меняет состояние системных пакетов. Автор не несёт ответственности за потерю данных, сбои загрузки, проблемы после OTA, недоступность приложений, платежных/банковских приложений, гарантийные случаи, результат Play Integrity и любые другие последствия использования. Это open source — прочитай код перед установкой.
