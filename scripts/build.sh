@@ -17,6 +17,11 @@ with zipfile.ZipFile(output, "w", zipfile.ZIP_DEFLATED) as archive:
         files.sort()
         for name in files:
             path = os.path.join(base, name)
-            archive.write(path, os.path.relpath(path, module_dir))
+            arcname = os.path.relpath(path, module_dir)
+            info = zipfile.ZipInfo.from_file(path, arcname)
+            mode = 0o100755 if name.endswith(".sh") else 0o100644
+            info.external_attr = (mode << 16) | (info.external_attr & 0xffff)
+            with open(path, "rb") as source:
+                archive.writestr(info, source.read(), compress_type=zipfile.ZIP_DEFLATED)
 print(output)
 PY

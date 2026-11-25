@@ -7,6 +7,7 @@ TMP_DIR="$WORK_DIR/tmp"
 LOG_FILE="$WORK_DIR/log.txt"
 APPLIED_FILE="$WORK_DIR/applied.txt"
 WHITELIST_FILE="$WORK_DIR/whitelist.txt"
+CUSTOM_FILE="$WORK_DIR/custom.txt"
 PROFILE_FILE="$WORK_DIR/profile"
 DRY_RUN_FILE="$WORK_DIR/dry-run"
 
@@ -18,6 +19,7 @@ ensure_dirs() {
     mkdir -p "$WORK_DIR" "$TMP_DIR" 2>/dev/null || return 1
     [ -f "$LOG_FILE" ] || : >"$LOG_FILE" 2>/dev/null || true
     [ -f "$APPLIED_FILE" ] || : >"$APPLIED_FILE" 2>/dev/null || true
+    [ -f "$CUSTOM_FILE" ] || : >"$CUSTOM_FILE" 2>/dev/null || true
     [ -f "$PROFILE_FILE" ] || printf 'safe\n' >"$PROFILE_FILE" 2>/dev/null || true
     if [ ! -f "$WHITELIST_FILE" ] && [ -f "$MODDIR/profiles/whitelist.txt" ]; then
         cp "$MODDIR/profiles/whitelist.txt" "$WHITELIST_FILE" 2>/dev/null || true

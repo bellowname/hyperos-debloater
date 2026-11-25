@@ -1,0 +1,368 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>HyperOS Debloater</title>
+<style>
+  :root {
+    color-scheme: dark;
+    --bg: #0e1014;
+    --card: #191d24;
+    --card2: #222731;
+    --line: #303744;
+    --text: #e9edf3;
+    --muted: #8e99a8;
+    --accent: #ff7043;
+    --green: #4caf7d;
+    --red: #ef5b5b;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 16px 14px 40px;
+    background: var(--bg); color: var(--text);
+    font: 14px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+  h1 { font-size: 20px; margin: 0 0 2px; }
+  h2 { font-size: 14px; margin: 0 0 10px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: .04em; }
+  .sub { color: var(--muted); font-size: 12px; margin-bottom: 14px; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 14px; margin-bottom: 12px; }
+  .row { display: flex; align-items: center; gap: 10px; }
+  .between { justify-content: space-between; }
+  .profiles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .chip {
+    border: 1px solid var(--line); background: var(--card2); color: var(--text);
+    border-radius: 12px; padding: 12px 8px; text-align: center; cursor: pointer;
+    font-weight: 600; font-size: 13px;
+  }
+  .chip small { display: block; font-weight: 400; color: var(--muted); font-size: 10px; margin-top: 4px; }
+  .chip.active { border-color: var(--accent); background: rgba(255,112,67,.14); color: #ffb199; }
+  button, .btn {
+    border: 1px solid var(--line); background: var(--card2); color: var(--text);
+    border-radius: 10px; padding: 9px 12px; cursor: pointer; font: inherit; font-size: 13px;
+  }
+  button:active { transform: translateY(1px); }
+  button.primary { background: var(--accent); border-color: var(--accent); color: #1a0d08; font-weight: 700; }
+  button.danger { color: #ff9a9a; }
+  button:disabled, input:disabled { opacity: .45; cursor: not-allowed; }
+  .actions { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 10px; }
+  .switch { position: relative; width: 42px; height: 24px; flex: 0 0 42px; }
+  .switch input { opacity: 0; width: 0; height: 0; }
+  .slider { position: absolute; inset: 0; background: #3b4350; border-radius: 24px; transition: .15s; }
+  .slider::before { content: ""; position: absolute; width: 18px; height: 18px; left: 3px; top: 3px; background: #fff; border-radius: 50%; transition: .15s; }
+  .switch input:checked + .slider { background: var(--green); }
+  .switch input:checked + .slider::before { transform: translateX(18px); }
+  .switch input:disabled + .slider { opacity: .4; }
+  .filters { display: flex; gap: 6px; margin: 10px 0; flex-wrap: wrap; }
+  .filters button { padding: 6px 10px; font-size: 12px; }
+  .filters button.on { border-color: var(--accent); color: #ffb199; }
+  input[type=search] {
+    width: 100%; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--line);
+    background: var(--card2); color: var(--text); font: inherit;
+  }
+  .pkg { flex: 1; min-width: 0; }
+  .pkg b { display: block; font-size: 12px; word-break: break-all; font-weight: 600; }
+  .pkg span { font-size: 11px; color: var(--muted); }
+  .item { padding: 10px 0; border-bottom: 1px solid var(--line); }
+  .item:last-child { border-bottom: 0; }
+  .item.off .pkg b { color: var(--muted); }
+  .tag { font-size: 10px; border-radius: 6px; padding: 2px 6px; background: var(--card2); color: var(--muted); white-space: nowrap; }
+  .tag.applied { color: #ffb199; }
+  .tag.white { color: #9ad4b4; }
+  .star { padding: 5px 8px; font-size: 16px; line-height: 1; }
+  .star.on { color: var(--green); }
+  pre {
+    background: #0b0d10; border: 1px solid var(--line); border-radius: 10px;
+    padding: 10px; max-height: 260px; overflow: auto; font-size: 11px; color: #b6c2d0; white-space: pre-wrap; word-break: break-word;
+  }
+  #banner {
+    position: sticky; top: 0; z-index: 5; margin: -4px 0 10px;
+    padding: 10px 12px; border-radius: 10px; background: rgba(76,175,125,.16);
+    border: 1px solid var(--green); color: #b9e8d0; font-size: 13px; display: none;
+  }
+  #banner.bad { background: rgba(239,91,91,.14); border-color: var(--red); color: #ffb3b3; }
+  .stat { color: var(--muted); font-size: 12px; }
+  .stat b { color: var(--text); }
+  .hidden { display: none !important; }
+</style>
+</head>
+<body>
+<div id="banner"></div>
+
+<div class="card">
+  <h1>HyperOS Debloater</h1>
+  <div class="sub">Безопасное отключение рекламы и лишних сервисов Xiaomi / Redmi / POCO</div>
+  <div class="stat" id="stats">Загрузка…</div>
+</div>
+
+<div class="card">
+  <h2>Профиль</h2>
+  <div class="profiles" id="profiles">
+    <button class="chip" data-profile="safe">Safe<small>реклама, аналитика</small></button>
+    <button class="chip" data-profile="balanced">Balanced<small>+ магазины, браузер</small></button>
+    <button class="chip" data-profile="aggressive">Aggressive<small>+ Joyose, AOD</small></button>
+  </div>
+  <div class="row between" style="margin-top:14px">
+    <div>
+      <b>Сухой прогон</b>
+      <div class="stat">Только лог, ничего не отключается</div>
+    </div>
+    <label class="switch"><input type="checkbox" id="dryrun"><span class="slider"></span></label>
+  </div>
+  <div class="actions">
+    <button id="apply">Применить</button>
+    <button id="scan">Сканировать</button>
+    <button id="restore" class="danger">Всё вернуть</button>
+  </div>
+</div>
+
+<div class="card">
+  <h2>Пакеты</h2>
+  <input type="search" id="search" placeholder="Поиск по имени пакета">
+  <div class="filters" id="filters">
+    <button data-filter="all" class="on">Все</button>
+    <button data-filter="installed">Установленные</button>
+    <button data-filter="disabled">Отключённые</button>
+  </div>
+  <div id="packages"><div class="stat">Загрузка…</div></div>
+  <div class="stat" style="margin-top:10px">
+    Выключатель = пакет отключён. ★ = никогда не трогать (whitelist).
+  </div>
+</div>
+
+<div class="card">
+  <div class="row between">
+    <h2 style="margin:0">Лог / отчёт</h2>
+    <button id="showlog">Обновить лог</button>
+  </div>
+  <pre id="log" style="margin-top:10px">Нажми «Обновить лог».</pre>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  var BACKEND = "/data/adb/modules/hyperos_debloater/scripts/webui.sh";
+  var SEQ = 0;
+  var status = {};
+  var packages = [];
+  var filter = "all";
+  var query = "";
+
+  var DESC = {
+    "com.miui.analytics": "Аналитика Xiaomi",
+    "com.miui.systemAdSolution": "Системная реклама",
+    "com.miui.msa.global": "Рекомендации и реклама",
+    "com.miui.yellowpage": "Жёлтые страницы",
+    "com.miui.bugreport": "Отчёты об ошибках",
+    "com.android.browser": "Браузер (Global)",
+    "com.miui.browser": "Браузер (CN)",
+    "com.xiaomi.mipicks": "GetApps / магазин",
+    "com.miui.market": "Магазин (CN)",
+    "com.xiaomi.shop": "Магазин Xiaomi",
+    "com.miui.videoplayer": "Mi Video",
+    "com.miui.video": "Видеосервис",
+    "com.xiaomi.mirror": "Зеркалирование экрана",
+    "com.xiaomi.scanner": "Сканер QR",
+    "com.miui.hybrid": "Гибридные сервисы",
+    "com.xiaomi.joyose": "Производительность, игры",
+    "com.xiaomi.discover": "Рекомендации",
+    "com.miui.aod": "Always-On Display",
+    "com.miui.miwallpaper": "Каталог обоев",
+    "com.miui.voiceassist": "Голосовой помощник",
+    "com.miui.powerkeeper": "Энергопотребление",
+    "com.miui.luckymoney": "Красные конверты",
+    "com.miui.gamebooster": "Игровой режим"
+  };
+
+  function $(id) { return document.getElementById(id); }
+  function esc(s) {
+    return String(s).replace(/[&<>"']/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+    });
+  }
+  function banner(msg, bad) {
+    var b = $("banner");
+    b.textContent = msg;
+    b.className = bad ? "bad" : "";
+    b.style.display = "block";
+    if (msg) setTimeout(function () { b.style.display = "none"; }, 4000);
+  }
+
+  // KsuWebUIStandalone: ksu.exec(cmd, "globalCallbackName")
+  function call(args) {
+    return new Promise(function (resolve) {
+      var cmd = "sh " + BACKEND + " " + args;
+      if (!window.ksu || typeof window.ksu.exec !== "function") {
+        resolve({ code: 1, out: "", err: "ksu API недоступен. Открой модуль через KsuWebUI / KernelSU WebUI." });
+        return;
+      }
+      var name = "__hdb_cb_" + (++SEQ);
+      window[name] = function (code, out, err) {
+        try { resolve({ code: code || 0, out: out || "", err: err || "" }); }
+        finally { try { delete window[name]; } catch (e) {} }
+      };
+      try { window.ksu.exec(cmd, name); }
+      catch (e) {
+        try { delete window[name]; } catch (e2) {}
+        resolve({ code: 1, out: "", err: String(e) });
+      }
+    });
+  }
+
+  function check(res) {
+    var out = (res.out || "").trim();
+    if (out.indexOf("ERR ") === 0) { banner(out.slice(4), true); return null; }
+    if (res.code && !(res.out || "").trim() && (res.err || "").trim()) {
+      banner((res.err || "").trim().slice(0, 200), true); return null;
+    }
+    if (res.err && res.err.trim() && window.console) console.warn(res.err);
+    return out;
+  }
+
+  function parseStatus(out) {
+    status = {};
+    out.split("\n").forEach(function (line) {
+      var i = line.indexOf("=");
+      if (i > 0) status[line.slice(0, i).trim()] = line.slice(i + 1).trim();
+    });
+    $("stats").innerHTML = "Версия <b>" + esc(status.version || "?") + "</b> · профиль <b>" +
+      esc(status.profile || "?") + "</b> · отключено <b>" + esc(status.applied || "0") +
+      "</b> · ручных <b>" + esc(status.custom || "0") + "</b>";
+    Array.prototype.forEach.call(document.querySelectorAll("#profiles .chip"), function (el) {
+      el.classList.toggle("active", el.dataset.profile === status.profile);
+    });
+    $("dryrun").checked = status.dryrun === "on";
+  }
+
+  function renderList() {
+    var q = query.toLowerCase();
+    var shown = packages.filter(function (p) {
+      if (filter === "installed" && !p.installed) return false;
+      if (filter === "disabled" && p.enabled) return false;
+      return !q || p.pkg.toLowerCase().indexOf(q) !== -1 || (DESC[p.pkg] || "").toLowerCase().indexOf(q) !== -1;
+    });
+    if (!shown.length) {
+      $("packages").innerHTML = '<div class="stat">Ничего не найдено.</div>';
+      return;
+    }
+    $("packages").innerHTML = shown.map(function (p) {
+      var tags = "";
+      if (p.inprofile) tags += '<span class="tag applied">в профиле</span> ';
+      if (p.whitelisted) tags += '<span class="tag white">исключён</span> ';
+      if (!p.installed) tags += '<span class="tag">не установлен</span>';
+      return '<div class="item' + (p.enabled ? "" : " off") + '" data-pkg="' + esc(p.pkg) + '">' +
+        '<div class="row">' +
+          '<div class="pkg"><b>' + esc(p.pkg) + '</b><span>' + esc(DESC[p.pkg] || "Системный пакет") + '</span></div>' +
+          '<label class="switch" title="' + (p.enabled ? "Выключить" : "Включить") + '">' +
+            '<input type="checkbox" class="toggle" data-pkg="' + esc(p.pkg) + '"' +
+            (p.enabled ? "" : " checked") + (p.installed ? "" : " disabled") + '>' +
+            '<span class="slider"></span>' +
+          '</label>' +
+          '<button class="star' + (p.whitelisted ? " on" : "") + '" data-pkg="' + esc(p.pkg) + '"' +
+            ' data-white="' + (p.whitelisted ? 1 : 0) + '" title="Whitelist">' +
+            (p.whitelisted ? "★" : "☆") + '</button>' +
+        '</div>' +
+        '<div class="row" style="margin-top:6px;gap:5px">' + tags + '</div>' +
+      '</div>';
+    }).join("");
+  }
+
+  function parseList(out) {
+    packages = [];
+    out.split("\n").forEach(function (line) {
+      var f = line.split("|");
+      if (f.length !== 6) return;
+      packages.push({
+        pkg: f[0], installed: f[1] === "1", enabled: f[2] === "1",
+        whitelisted: f[3] === "1", applied: f[4] === "1", inprofile: f[5] === "1"
+      });
+    });
+    renderList();
+  }
+
+  async function refresh() {
+    var st = await call("status");
+    var out = check(st);
+    if (out !== null) parseStatus(out);
+    var li = await call("list");
+    out = check(li);
+    if (out !== null) parseList(out);
+  }
+
+  async function doAction(args, okMsg) {
+    var res = await call(args);
+    var out = check(res);
+    if (out === null) return false;
+    if (okMsg) banner(okMsg);
+    return true;
+  }
+
+  document.addEventListener("click", function (e) {
+    var chip = e.target.closest("[data-profile]");
+    if (chip) {
+      doAction("set-profile " + chip.dataset.profile, "Профиль: " + chip.dataset.profile).then(function (ok) {
+        if (ok) refresh();
+      });
+      return;
+    }
+    var f = e.target.closest("[data-filter]");
+    if (f) {
+      filter = f.dataset.filter;
+      Array.prototype.forEach.call(document.querySelectorAll("#filters button"), function (el) {
+        el.classList.toggle("on", el === f);
+      });
+      renderList();
+      return;
+    }
+    var star = e.target.closest(".star");
+    if (star) {
+      var op = star.dataset.white === "1" ? "remove" : "add";
+      doAction("whitelist " + star.dataset.pkg + " " + op, "Whitelist обновлён").then(function (ok) {
+        if (ok) refresh();
+      });
+      return;
+    }
+    if (e.target.closest("#apply")) {
+      doAction("apply", "Профиль применён").then(function (ok) { if (ok) refresh(); });
+    } else if (e.target.closest("#scan")) {
+      doAction("scan", "Сканирование завершено").then(function () { return call("report"); })
+        .then(function (r) { var out = check(r); if (out !== null) $("log").textContent = out; });
+    } else if (e.target.closest("#restore")) {
+      // WebView может не показывать window.confirm — подтверждаем двойным нажатием.
+      var btn = e.target.closest("#restore");
+      if (btn.dataset.armed !== "1") {
+        btn.dataset.armed = "1";
+        btn.textContent = "Точно? Ещё раз";
+        banner("Повторное нажатие включит все отключённые пакеты", true);
+        return;
+      }
+      btn.dataset.armed = "0";
+      btn.textContent = "Всё вернуть";
+      doAction("restore", "Все пакеты восстановлены").then(function (ok) { if (ok) refresh(); });
+    } else if (e.target.closest("#showlog")) {
+      call("log 200").then(function (r) { var out = check(r); if (out !== null) $("log").textContent = out || "(лог пуст)"; });
+    }
+  });
+
+  document.addEventListener("change", function (e) {
+    if (e.target.id === "dryrun") {
+      doAction("dry-run " + (e.target.checked ? "on" : "off"), "Сухой прогон " + (e.target.checked ? "включён" : "выключен"))
+        .then(function (ok) { if (!ok) e.target.checked = !e.target.checked; });
+      return;
+    }
+    if (e.target.classList.contains("toggle")) {
+      var pkg = e.target.dataset.pkg;
+      var op = e.target.checked ? "disable" : "enable";
+      doAction("toggle " + pkg + " " + op, pkg + ": " + (e.target.checked ? "отключён" : "включён"))
+        .then(function (ok) { if (!ok) e.target.checked = !e.target.checked; else refresh(); });
+    }
+  });
+
+  $("search").addEventListener("input", function (e) { query = e.target.value; renderList(); });
+
+  refresh();
+})();
+</script>
+</body>
+</html>

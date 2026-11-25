@@ -14,7 +14,11 @@ if [ ! -f "$profile_file" ]; then
 fi
 
 package_list
-read_packages "$profile_file" >"$TMP_DIR/target.txt"
+# Профиль + ручные выборы из WebUI (custom.txt).
+{
+    read_packages "$profile_file"
+    read_packages "$CUSTOM_FILE"
+} | sort -u >"$TMP_DIR/target.txt"
 read_packages "$APPLIED_FILE" >"$TMP_DIR/previous.txt"
 : >"$TMP_DIR/cleanup.txt"
 
