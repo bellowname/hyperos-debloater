@@ -10,8 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Documentation-only improvements: English and Russian README restructure,
-  repository metadata proposal, security policy, release notes template,
-  announcement drafts and screenshot checklist.
+  security policy, release notes template, issue templates and screenshot checklist.
 
 ## [1.1.1] - 2026-11-25
 
