@@ -1,141 +1,149 @@
 # HyperOS Debloater (Safe Profiles)
 
-[![build](https://github.com/bellowname/hyperos-debloater/actions/workflows/build.yml/badge.svg)](https://github.com/bellowname/hyperos-debloater/actions/workflows/build.yml)
+[![Release](https://img.shields.io/github/v/release/bellowname/hyperos-debloater?display_name=tag)](https://github.com/bellowname/hyperos-debloater/releases/latest)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Release](https://img.shields.io/github/v/release/bellowname/hyperos-debloater)](https://github.com/bellowname/hyperos-debloater/releases/latest)
+![Magisk](https://img.shields.io/badge/Magisk-tested-orange)
+![KernelSU](https://img.shields.io/badge/KernelSU-unverified-lightgrey)
+![APatch](https://img.shields.io/badge/APatch-unverified-lightgrey)
+![HyperOS](https://img.shields.io/badge/HyperOS-1.x%2F2.x-blue)
 
-[Русская версия](README_RU.md)
+[Русская версия](README_RU.md) · [Packages](docs/PACKAGES.md) · [Security policy](SECURITY.md)
 
-**Safely disable Xiaomi ads, analytics and bloat on HyperOS / MIUI — without deleting system apps.**
+**HyperOS debloater for Xiaomi, Redmi and POCO: it safely disables ads, analytics and bloat with `pm disable-user` instead of deleting system apps.**
 
-A Magisk module for Xiaomi, Redmi and POCO that turns annoying system services off with `pm disable-user`. Everything can be restored with one tap, and a clean WebUI makes it easy to use on **Magisk, KernelSU and APatch**.
+This is a **Magisk module** for rooted devices. It does not remove applications: it only changes their enabled state and can restore everything on uninstall. A three-profile system (`safe`, `balanced`, `aggressive`), a protected whitelist, dry-run mode and an offline WebUI make the process reviewable and reversible.
+
+> Requires root. This is **not** a "debloat without root" solution.
 
 ![HyperOS Debloater WebUI](docs/screenshots/webui.jpg)
 
-## Why another debloater?
+## What it is / why not just delete apps
 
-- **Nothing is deleted.** Packages are only disabled, never uninstalled or wiped.
-- **Three profiles:** `safe` → `balanced` → `aggressive`, switchable from Magisk Action or WebUI.
-- **Safe-by-default whitelist:** launcher, keyguard, Security Center, Theme, Backup, Wallet, Google Play services and others are never touched.
-- **Dry-run mode:** see what the module *would* disable before it does anything.
-- **Full rollback:** uninstalling the module re-enables everything it disabled, including packages you disabled manually in the WebUI.
-- **WebUI included:** profiles, per-package toggles, whitelist, log and scanner in a nice offline page via [KsuWebUI Standalone](https://github.com/5ec1cff/KsuWebUIStandalone).
-- **Works everywhere:** on non-Xiaomi ROMs it simply finds nothing and changes nothing.
+Most Xiaomi system packages cannot be uninstalled from Settings, and deleting them from `/system` is risky and breaks OTA updates. This module:
 
-## Install
+- calls `pm disable-user --user 0 <package>` for a fixed list of packages;
+- never removes APKs or wipes data;
+- keeps a list of everything it disabled;
+- re-enables those packages when the module is uninstalled;
+- protects critical packages with a whitelist, even if a profile lists them.
+
+Read the exact list in [docs/PACKAGES.md](docs/PACKAGES.md).
+
+## Safety model
+
+| Property | Implementation |
+|---|---|
+| No `/system` modification | Only package-manager state is changed; files are kept in `/data/adb/hyperos_debloater` |
+| Reversible | `uninstall.sh` calls `pm enable` for packages from `applied.txt` and `custom.txt` |
+| Protected components | Launcher, keyguard, Security Center, Security Core, Theme, Backup, Face, Gallery, Wallet, Find Device, Smart Home and `com.google.android.gms` are whitelisted by default |
+| Preview before action | `dry-run` file or WebUI switch — actions are logged but not applied |
+| No telemetry | WebUI is a local page; no network requests are made by the module |
+| Failure visibility | Real `pm` errors are written to `log.txt` as `PM DISABLE FAIL ...` |
+
+The default profile is `safe`. Start with it, run the scanner, and only then consider `balanced` or `aggressive`.
+
+## Support matrix
+
+Only the following has been verified by the author. Everything else is marked as needing confirmation.
+
+| Item | Status | Notes |
+|---|---|---|
+| Device | Redmi Note 12, codename `tapas` | Verified |
+| HyperOS | 2.0.209.0 | Verified |
+| ROM region | Global (reported by the author, not strictly verified) | No region-specific profiles yet |
+| Android | 15 | Verified |
+| Root / module format | Magisk | Verified on v1.1.1; no other root solution was available for testing |
+| KernelSU | **Requires testing** | Uses Magisk-style scripts; not verified by the author |
+| APatch | **Requires testing** | Uses Magisk-style scripts; not verified by the author |
+| WebUI host | KsuWebUI Standalone | Required; the app itself supports Magisk / KernelSU / APatch |
+| Other HyperOS 1.x/2.x devices | **Requires testing** | The code only checks package names; no device-specific lock |
+| Other Android versions | **Requires testing** | `pm` syntax may differ |
+| AOSP-like ROMs | Expected no-op | Candidate Xiaomi packages will not be found; not separately tested |
+
+## Installation
 
 1. Download `hyperos-debloater.zip` from [Releases](https://github.com/bellowname/hyperos-debloater/releases/latest).
 2. Magisk → Modules → **Install from storage** → select the zip → reboot.
-3. Default profile is `safe`. Use Magisk **Action** to cycle profiles, or open the WebUI.
-4. For the graphical menu, install [KsuWebUI Standalone](https://github.com/5ec1cff/KsuWebUIStandalone/releases) and open **HyperOS Debloater** from its module list.
+   For KernelSU / APatch the installation flow may differ and has not been verified by the author.
+3. After boot, the default profile `safe` is applied automatically.
+4. Optional: install [KsuWebUI Standalone](https://github.com/5ec1cff/KsuWebUIStandalone/releases) to use the graphical menu.
 
 ## Profiles
 
-| Profile | Disables | Risk |
+| Profile | What it disables | Risk |
 |---|---|---|
-| `safe` | ads, analytics, Yellow Page, bug reports | minimal |
-| `balanced` | + GetApps/store, browser, video, Miracast, QR scanner | medium — whitelist what you use |
-| `aggressive` | + Joyose, Discover, AOD, wallpapers, voice assistant, powerkeeper, game booster | higher — some Xiaomi features will disappear |
+| `safe` (default) | `com.miui.analytics`, `com.miui.systemAdSolution`, `com.miui.msa.global`, `com.miui.yellowpage`, `com.miui.bugreport` | Minimal: ads, analytics, Yellow Page, bug reports |
+| `balanced` | Everything from `safe` plus browser, GetApps/store, Xiaomi Shop, Mi Video, Miracast, QR scanner, hybrid services | Medium: built-in apps you may actually use will stop working |
+| `aggressive` | Everything from `balanced` plus Joyose, Discover, AOD, wallpapers, voice assistant, powerkeeper, luckymoney, game booster | Higher: game profiles, AOD and some Xiaomi features may disappear |
 
-Full package list with descriptions: [docs/PACKAGES.md](docs/PACKAGES.md).
+Missing packages are skipped. Use the scanner before choosing a stronger profile.
 
 ## WebUI
 
-Magisk has no built-in WebUI, so this module uses the excellent
-[KsuWebUIStandalone](https://github.com/5ec1cff/KsuWebUIStandalone) app by 5ec1cff.
-It works with Magisk, KernelSU and APatch. After installing the module it appears in the app's list.
+Magisk has no built-in WebUI renderer. The module ships a local `webroot/index.html`; open it with **KsuWebUI Standalone** by 5ec1cff.
 
-You can:
+1. Install KsuWebUI Standalone from its releases page.
+2. Grant root when asked.
+3. Open **HyperOS Debloater** in the module list.
 
-- switch profiles with one tap;
-- enable/disable individual packages — choices survive reboot via `custom.txt`;
-- tap ★ to add a package to the whitelist forever;
-- enable dry-run and inspect the log;
-- run the scanner and read its report inside the page;
-- restore everything with the **Restore all** button (press twice to confirm).
+In the WebUI you can switch profiles, toggle individual packages, add/remove whitelist entries, enable dry-run, run the scanner and read the log. Choices made there are saved to `custom.txt` and survive reboot.
 
-The page is fully local (`webroot/index.html`), needs no internet and sends no telemetry.
-Commands go through `scripts/webui.sh`, which only accepts known package names.
+## Dry-run
 
-## Files and manual control
-
-User files live in `/data/adb/hyperos_debloater`:
-
-| File | Purpose |
-|---|---|
-| `profile` | active profile: `safe`, `balanced` or `aggressive` |
-| `whitelist.txt` | packages the module must never touch |
-| `custom.txt` | packages disabled manually in WebUI (survive reboot) |
-| `applied.txt` | packages disabled by the module (used for restore) |
-| `log.txt` | timestamped action log |
-| `dry-run` | if present, nothing is disabled — only logged |
-
-Examples in Termux with root:
+Create the marker file and apply the profile — nothing will be disabled, only logged:
 
 ```sh
-# See which known packages are actually installed
-su -c 'sh /data/adb/modules/hyperos_debloater/scripts/scan.sh'
-# Report: /sdcard/Download/hyperos-debloater-packages.txt
-
-# Dry run
 su -c 'touch /data/adb/hyperos_debloater/dry-run'
 su -c 'sh /data/adb/modules/hyperos_debloater/scripts/apply.sh'
-cat /data/adb/hyperos_debloater/log.txt
-su -c 'rm /data/adb/hyperos_debloater/dry-run'
-
-# Select a profile manually
-su -c 'echo balanced > /data/adb/hyperos_debloater/profile'
-su -c 'sh /data/adb/modules/hyperos_debloater/scripts/apply.sh'
-
-# Restore everything without uninstalling
-su -c 'sh /data/adb/modules/hyperos_debloater/scripts/restore.sh'
+cat /data/adb/hyperos_debloater/log.txt | grep DRY-RUN
 ```
 
-## Supported devices
-
-Any HyperOS 1.x/2.x or MIUI 12+ device. Developed and tested on a Redmi Note 12
-(`tapas`, Snapdragon 685, Android 15 / HyperOS 2.0). On AOSP-like ROMs the module
-finds no Xiaomi packages and does nothing.
-
-## FAQ
-
-**Something broke (launcher, lockscreen)?** Disable or uninstall the module in Magisk —
-all packages are re-enabled. If the phone will not boot, delete
-`/data/adb/modules/hyperos_debloater` from recovery.
-
-**The log says `DISABLE FAIL` or `RESTORE FAIL`.** Update to v1.1.1 first: the module now
-waits for PackageManager after boot, retries and logs the real `pm` error as
-`PM DISABLE FAIL ...`. If it still fails, open an issue with that line from `log.txt`.
-
-**Can I edit profiles?** Yes, but adding a package to `whitelist.txt` is safer — whitelist
-entries survive module updates.
-
-## Roadmap
-
-- [x] WebUI with package toggles (Magisk / KernelSU / APatch via KsuWebUI)
-- [ ] Region-specific profiles (Global / CN / EEA / RU)
-- [ ] Community-maintained candidate list via `update.json`
-- [ ] Notification after applying a profile
-
-## Build
+Remove the marker to apply changes for real:
 
 ```sh
-sh scripts/build.sh          # → hyperos-debloater.zip
+su -c 'rm /data/adb/hyperos_debloater/dry-run'
 ```
 
-Before releasing, replace `bellowname` in `module/module.prop`, `update.json`,
-README badges and `LICENSE` with your GitHub username.
+The same switch is available in WebUI.
 
-## Contributing
+## Rollback
 
-Package names differ between regions and ROMs. Run `scan.sh`, attach the report to an
-issue, and read [CONTRIBUTING.md](CONTRIBUTING.md) before sending a PR.
+- **Keeping the module:** WebUI → **Restore all** (press twice to confirm), or
+  `su -c 'sh /data/adb/modules/hyperos_debloater/scripts/restore.sh'`.
+- **Removing the module:** uninstall it in Magisk. `uninstall.sh` re-enables packages listed in `applied.txt` and `custom.txt`.
+- **Cannot boot:** boot into recovery and delete `/data/adb/modules/hyperos_debloater`. Then remove the marker files in `/data/adb/hyperos_debloater` if needed.
 
-## Disclaimer
+## FAQ / troubleshooting
 
-This module changes the enabled state of system packages. Make a backup. The author is
-not responsible for consequences. It is open source — read the code before installing.
+**An app disappeared.** It was probably disabled by a profile. Check `applied.txt`, add the package to `whitelist.txt` (or tap ★ in WebUI), then run `restore.sh`.
 
-## License
+**Bootloop.** Disable/uninstall the module from recovery by deleting its directory. Do not flash aggressive profiles on an untested device.
 
-MIT. If this helped you, a ⭐ on GitHub is the best motivation to keep updating it.
+**OTA update.** Disabled package state may be reset by an OTA; availability after OTA has not been tested. After updating, check `log.txt` and re-apply the profile if needed.
+
+**SafetyNet / Play Integrity.** This module does not hide root and does not claim to fix Play Integrity. No tests were performed.
+
+**HyperOS 2 / `DISABLE FAIL`.** Install v1.1.1 or newer: it waits for PackageManager, retries and logs the real error. If the line `PM DISABLE FAIL ...` remains, open an issue with that exact line and your scan report.
+
+**Non-Xiaomi ROM.** The code looks for specific Xiaomi package names and skips what is missing. No device-specific magic is used; behavior is expected to be a no-op but not separately tested.
+
+## Screenshots to add
+
+See [docs/SCREENSHOTS.md](docs/SCREENSHOTS.md) for the capture checklist.
+
+Currently available:
+
+1. `docs/screenshots/webui.jpg` — **WebUI main screen: profile cards, package list and toggles**.
+
+Useful next captures (not yet available):
+
+2. Dry-run enabled + `DRY-RUN disable ...` lines in `log.txt`.
+3. Scanner report in `/sdcard/Download/hyperos-debloater-packages.txt`.
+4. WebUI after **Restore all** with the log showing `RESTORE`.
+5. Magisk module page with the **Action** button visible.
+
+## License and disclaimer
+
+MIT — see [LICENSE](LICENSE). Security reports: [SECURITY.md](SECURITY.md). Contributions: [CONTRIBUTING.md](CONTRIBUTING.md).
+
+**Make a backup and use dry-run first.** This module changes system package states. The author is not responsible for data loss, boot failures, OTA problems, unavailable apps, payment/banking app issues, warranty claims, Play Integrity results or any other consequences of use. It is open source: read the code before installing.

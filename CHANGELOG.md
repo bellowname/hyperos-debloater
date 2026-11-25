@@ -1,36 +1,60 @@
 # Changelog
 
-## 1.1.1 (2026-11-25)
+All notable changes to this project are documented in this file.
 
-- **Исправлено отключение пакетов на HyperOS.** Раньше `pm disable-user` мог падать
-  сразу после загрузки, и в логе появлялось `DISABLE FAIL`. Теперь:
-  - модуль ждёт, пока package manager реально ответит;
-  - делает до двух попыток с паузой;
-  - если нужно, использует запасной `pm disable`;
-  - в лог пишется настоящая ошибка `pm`, а не просто `FAIL`.
-- `pm enable` теперь всегда вызывается с явным `--user 0` — исправлены `RESTORE FAIL`
-  и «Восстановлено пакетов: 0».
-- Добавлен английский [README.md](README.md); русская версия перенесена в [README_RU.md](README_RU.md).
-- В README добавлен скриншот WebUI.
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## 1.1.0 (2026-11-25)
+## [Unreleased]
 
-- **WebUI** для Magisk / KernelSU / APatch через приложение [KsuWebUI](https://github.com/5ec1cff/KsuWebUIStandalone):
-  выбор профиля, список пакетов с выключателями, whitelist, dry-run, лог и сканер.
-- Ручные выборы в WebUI сохраняются в `custom.txt` и переживают перезагрузку.
-- Включение пакета через WebUI автоматически добавляет его в whitelist.
-- `uninstall.sh` теперь возвращает и пакеты, отключённые вручную через WebUI.
-- Обновлён `update.json` (версия 1.1.0).
-- Сборщик zip теперь выставляет права 0755 на `.sh` и 0644 на остальные файлы.
-- CI: добавлено разрешение `contents: write`, чтобы zip автоматически прикреплялся к релизу.
+### Added
 
-## 1.0.0 (2026-11-25)
+- Documentation-only improvements: English and Russian README restructure,
+  repository metadata proposal, security policy, release notes template,
+  announcement drafts and screenshot checklist.
 
-- Первый релиз.
-- Три профиля: `safe`, `balanced`, `aggressive`.
-- Переключение профиля кнопкой Action в Magisk.
-- Whitelist критических пакетов.
-- Сухой прогон через файл `dry-run`.
-- Сканер установленных кандидатов (`scripts/scan.sh`).
-- Полный возврат при uninstall через `uninstall.sh`.
-- Сборка zip через GitHub Actions.
+## [1.1.1] - 2026-11-25
+
+### Fixed
+
+- `pm disable-user` failures at boot on HyperOS: the module now waits for
+  PackageManager, retries with a pause and falls back to `pm disable`.
+- `RESTORE FAIL` / "Восстановлено пакетов: 0": `pm enable` now uses explicit
+  `--user 0` with a fallback.
+- Real `pm` errors are logged as `PM DISABLE FAIL ...` instead of a bare `FAIL`.
+
+### Added
+
+- English README; Russian version moved to `README_RU.md`.
+- WebUI screenshot in `docs/screenshots/webui.jpg`.
+
+## [1.1.0] - 2026-11-25
+
+### Added
+
+- WebUI for Magisk / KernelSU / APatch via KsuWebUI Standalone: profile switch,
+  package toggles, whitelist, dry-run, log and scanner.
+- `custom.txt` for manual toggles that survive reboot.
+- Enabling a package in WebUI adds it to `whitelist.txt`.
+- `uninstall.sh` also restores packages disabled manually in WebUI.
+- GitHub Actions workflow with zip build and release attachment.
+
+### Changed
+
+- Build script sets `0755` on `.sh` files and `0644` on other files.
+- Workflow has `contents: write` permission for release assets.
+
+## [1.0.0] - 2026-11-25
+
+### Added
+
+- Initial release.
+- Three profiles: `safe`, `balanced`, `aggressive`.
+- Whitelist of critical packages.
+- Dry-run marker and action log.
+- Scanner script and automatic restore on uninstall.
+
+[Unreleased]: https://github.com/bellowname/hyperos-debloater/compare/v1.1.1...HEAD
+[1.1.1]: https://github.com/bellowname/hyperos-debloater/releases/tag/v1.1.1
+[1.1.0]: https://github.com/bellowname/hyperos-debloater/releases/tag/v1.1.0
+[1.0.0]: https://github.com/bellowname/hyperos-debloater/releases/tag/v1.0.0

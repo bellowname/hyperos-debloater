@@ -1,25 +1,54 @@
-name: Предложение пакета или профиля
-description: Добавить пакет в список или предложить свой профиль
+name: Package or profile proposal
+description: Suggest a package name, a safer default or a region-specific profile
 title: "[Feature]: "
 labels: [enhancement]
 body:
   - type: input
     id: rom
     attributes:
-      label: Устройство / ROM / регион
-      placeholder: Poco X5 Pro, HyperOS 2.0 EEA Global
+      label: Device / ROM / region
+      placeholder: "Poco X5 Pro, HyperOS 2.0 EEA Global"
     validations:
       required: true
+
   - type: textarea
     id: packages
     attributes:
-      label: Имена пакетов и что они делают
-      placeholder: com.example.ads — показывает рекламу в шторке
+      label: Package names and what they do
+      placeholder: "com.example.ads — shows ads in the notification shade"
+      description: One package per line, with a short explanation
     validations:
       required: true
+
+  - type: dropdown
+    id: profile
+    attributes:
+      label: Where should it go
+      options:
+        - safe
+        - balanced
+        - aggressive
+        - whitelist
+        - new profile
+    validations:
+      required: true
+
   - type: textarea
     id: why
     attributes:
-      label: Почему это безопасно отключать
+      label: Why is it safe to disable
+      description: What stops working, what stays, and how you verified it
     validations:
-      required: false
+      required: true
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Before submitting
+      options:
+        - label: I ran scan.sh and the package is installed on my device
+          required: true
+        - label: I used dry-run before proposing this
+          required: false
+        - label: This is not a request to delete system apps
+          required: true
