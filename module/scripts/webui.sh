@@ -106,7 +106,7 @@ toggle)
     case "$action" in
     disable)
         is_whitelisted "$pkg" && die 'пакет в whitelist — сначала убери исключение'
-        if pm disable-user --user 0 "$pkg" >/dev/null 2>&1; then
+        if pm_disable "$pkg"; then
             append_unique "$CUSTOM_FILE" "$pkg"
             append_unique "$APPLIED_FILE" "$pkg"
             log "WebUI DISABLE $pkg (сохранено в custom.txt)"
@@ -116,7 +116,7 @@ toggle)
         fi
         ;;
     enable)
-        if pm enable "$pkg" >/dev/null 2>&1; then
+        if pm_enable "$pkg"; then
             remove_line "$CUSTOM_FILE" "$pkg"
             remove_line "$APPLIED_FILE" "$pkg"
             append_unique "$WHITELIST_FILE" "$pkg"

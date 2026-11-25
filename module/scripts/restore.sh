@@ -9,7 +9,7 @@ ensure_dirs || exit 1
 restored=0
 while IFS= read -r pkg; do
     [ -n "$pkg" ] || continue
-    if pm enable "$pkg" >/dev/null 2>&1; then
+    if pm_enable "$pkg"; then
         restored=$((restored + 1))
         log "RESTORE $pkg"
     else

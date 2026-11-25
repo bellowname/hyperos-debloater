@@ -26,7 +26,7 @@ read_packages "$APPLIED_FILE" >"$TMP_DIR/previous.txt"
 while IFS= read -r pkg; do
     [ -n "$pkg" ] || continue
     if ! grep -qx -- "$pkg" "$TMP_DIR/target.txt"; then
-        if pm enable "$pkg" >/dev/null 2>&1; then
+        if pm_enable "$pkg"; then
             printf '%s\n' "$pkg" >>"$TMP_DIR/cleanup.txt"
             log "ENABLE $pkg (больше не в профиле)"
         else
@@ -54,11 +54,11 @@ while IFS= read -r pkg; do
         skipped=$((skipped + 1))
         continue
     fi
-    if pm disable-user --user 0 "$pkg" >/dev/null 2>&1; then
+    if pm_disable "$pkg"; then
         disabled_now=$((disabled_now + 1))
         log "DISABLE $pkg"
     else
-        log "DISABLE FAIL $pkg"
+        log "DISABLE FAIL $pkg (см. строку PM DISABLE FAIL выше)"
     fi
 done <"$TMP_DIR/target.txt"
 

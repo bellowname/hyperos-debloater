@@ -11,7 +11,15 @@ export MODDIR
         [ "$attempts" -gt 180 ] && exit 0
         sleep 5
     done
-    sleep 20
+    sleep 30
+
+    # На HyperOS package manager иногда встаёт не сразу после boot_completed.
+    tries=0
+    until pm list packages >/dev/null 2>&1; do
+        tries=$((tries + 1))
+        [ "$tries" -gt 30 ] && break
+        sleep 2
+    done
 
     . "$MODDIR/scripts/common.sh"
     log "Boot completed, применяю профиль $(current_profile)"

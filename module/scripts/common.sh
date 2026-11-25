@@ -51,3 +51,44 @@ read_packages() {
     sed -e 's/#.*$//' -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' "$1" 2>/dev/null |
         tr -d '\r' | grep -v '^$' | sort -u
 }
+
+# Некоторые HyperOS-прошивки отказывают pm в первые секунды после загрузки
+# или требуют явный --user. Пытаемся несколько раз и пишем настоящую ошибку в лог.
+pm_disable() {
+    pkg=$1
+    out=$(pm disable-user --user 0 "$pkg" 2>&1)
+    rc=$?
+    if [ "$rc" -ne 0 ]; then
+        sleep 2
+        out=$(pm disable-user --user 0 "$pkg" 2>&1)
+        rc=$?
+    fi
+    if [ "$rc" -ne 0 ]; then
+        fallback=$(pm disable "$pkg" 2>&1)
+        if [ $? -eq 0 ]; then
+            log "PM fallback disable OK $pkg"
+            return 0
+        fi
+        log "PM DISABLE FAIL $pkg: $out | fallback: $fallback"
+        return 1
+    fi
+    [ -n "$out" ] && log "PM disable $pkg: $out"
+    return 0
+}
+
+pm_enable() {
+    pkg=$1
+    out=$(pm enable --user 0 "$pkg" 2>&1)
+    rc=$?
+    if [ "$rc" -ne 0 ]; then
+        fallback=$(pm enable "$pkg" 2>&1)
+        if [ $? -eq 0 ]; then
+            log "PM fallback enable OK $pkg"
+            return 0
+        fi
+        log "PM ENABLE FAIL $pkg: $out | fallback: $fallback"
+        return 1
+    fi
+    [ -n "$out" ] && log "PM enable $pkg: $out"
+    return 0
+}

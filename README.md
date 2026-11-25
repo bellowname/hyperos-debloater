@@ -2,140 +2,140 @@
 
 [![build](https://github.com/bellowname/hyperos-debloater/actions/workflows/build.yml/badge.svg)](https://github.com/bellowname/hyperos-debloater/actions/workflows/build.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Release](https://img.shields.io/github/v/release/bellowname/hyperos-debloater)](https://github.com/bellowname/hyperos-debloater/releases/latest)
 
-Magisk-модуль для Xiaomi / Redmi / POCO на HyperOS и MIUI. Отключает рекламные,
-рекомендательные и аналитические сервисы — **без удаления системных приложений** и
-с гарантированным возвратом при uninstall.
+[Русская версия](README_RU.md)
 
-## Зачем ещё один debloater
+**Safely disable Xiaomi ads, analytics and bloat on HyperOS / MIUI — without deleting system apps.**
 
-- **Ничего не удаляется.** Только `pm disable-user`, всё восстанавливается командой `pm enable`.
-- **Три профиля**: `safe` → `balanced` → `aggressive`, переключаются кнопкой Action в Magisk или в WebUI.
-- **WebUI** (с 1.1.0): выбор профиля, выключатели пакетов, whitelist, dry-run и лог — через приложение
-  [KsuWebUI](https://github.com/5ec1cff/KsuWebUIStandalone). Работает с Magisk, KernelSU и APatch.
-- **Whitelist**-critical пакетов (`home`, `keyguard`, `securitycenter`, `theme`, `backup`, …)
-  защищает устройство даже от ошибок в профиле.
-- **Сухой прогон** (`dry-run`): сначала смотришь, что модуль *собирается* отключить.
-- **Отчёт сканера**: список реально найденных на твоём устройстве пакетов.
-- **Автовозврат**: при удалении модуля `uninstall.sh` включает всё отключённое им.
-- Работает на любом ROM: на не-Xiaomi просто ничего не находит и не трогает систему.
+A Magisk module for Xiaomi, Redmi and POCO that turns annoying system services off with `pm disable-user`. Everything can be restored with one tap, and a clean WebUI makes it easy to use on **Magisk, KernelSU and APatch**.
 
-## Установка
+![HyperOS Debloater WebUI](docs/screenshots/webui.jpg)
 
-1. Скачай `hyperos-debloater.zip` из раздела **Releases**.
-2. Magisk → Модули → **Установить с устройства** → выбери zip → перезагрузка.
-3. После загрузки открой модуль и нажми **Action**, чтобы сменить профиль
-   (`safe` → `balanced` → `aggressive` → `safe`).
-4. Для красивого меню поставь [KsuWebUI](https://github.com/5ec1cff/KsuWebUIStandalone/releases)
-   и открой **HyperOS Debloater** в списке модулей.
+## Why another debloater?
 
-По умолчанию активен `safe`.
+- **Nothing is deleted.** Packages are only disabled, never uninstalled or wiped.
+- **Three profiles:** `safe` → `balanced` → `aggressive`, switchable from Magisk Action or WebUI.
+- **Safe-by-default whitelist:** launcher, keyguard, Security Center, Theme, Backup, Wallet, Google Play services and others are never touched.
+- **Dry-run mode:** see what the module *would* disable before it does anything.
+- **Full rollback:** uninstalling the module re-enables everything it disabled, including packages you disabled manually in the WebUI.
+- **WebUI included:** profiles, per-package toggles, whitelist, log and scanner in a nice offline page via [KsuWebUI Standalone](https://github.com/5ec1cff/KsuWebUIStandalone).
+- **Works everywhere:** on non-Xiaomi ROMs it simply finds nothing and changes nothing.
 
-## WebUI (рекомендуется)
+## Install
 
-Встроенного WebUI в Magisk нет, поэтому используется отдельное приложение
-[KsuWebUIStandalone](https://github.com/5ec1cff/KsuWebUIStandalone) от 5ec1cff.
-После установки модуля он появится в списке приложения — достаточно нажать на него.
+1. Download `hyperos-debloater.zip` from [Releases](https://github.com/bellowname/hyperos-debloater/releases/latest).
+2. Magisk → Modules → **Install from storage** → select the zip → reboot.
+3. Default profile is `safe`. Use Magisk **Action** to cycle profiles, or open the WebUI.
+4. For the graphical menu, install [KsuWebUI Standalone](https://github.com/5ec1cff/KsuWebUIStandalone/releases) and open **HyperOS Debloater** from its module list.
 
-Что можно сделать в меню:
+## Profiles
 
-- выбрать профиль `safe` / `balanced` / `aggressive` одной кнопкой;
-- включить/выключить конкретный пакет — выбор сохранится в `custom.txt` после перезагрузки;
-- нажать ★, чтобы навсегда исключить пакет (добавить в `whitelist.txt`);
-- включить «сухой прогон» и посмотреть лог перед применением;
-- запустить сканер и прочитать отчёт прямо в окне;
-- вернуть все пакеты кнопкой «Всё вернуть» (нужно нажать дважды).
-
-Страница целиком лежит в модуле (`webroot/index.html`), не требует интернета и не
-отправляет телеметрию. Все команды идут через защищённый бэкенд
-`scripts/webui.sh`, который принимает только известные имена пакетов.
-
-## Профили
-
-| Профиль | Что отключает | Риск |
+| Profile | Disables | Risk |
 |---|---|---|
-| `safe` | реклама, аналитика, `yellowpage`, bugreport | минимальный |
-| `balanced` | + GetApps/магазин, браузер, видео, Miracast, сканер | средний — добавь нужное в whitelist |
-| `aggressive` | + Joyose, discover, AOD, обои, голосовой помощник, powerkeeper, gamebooster | выше — часть фирменных фишек может пропасть |
+| `safe` | ads, analytics, Yellow Page, bug reports | minimal |
+| `balanced` | + GetApps/store, browser, video, Miracast, QR scanner | medium — whitelist what you use |
+| `aggressive` | + Joyose, Discover, AOD, wallpapers, voice assistant, powerkeeper, game booster | higher — some Xiaomi features will disappear |
 
-Конкретный список и описания — в [docs/PACKAGES.md](docs/PACKAGES.md) и `module/profiles/*.txt`.
+Full package list with descriptions: [docs/PACKAGES.md](docs/PACKAGES.md).
 
-## Пути и ручное управление
+## WebUI
 
-Все пользовательские файлы лежат в `/data/adb/hyperos_debloater`:
+Magisk has no built-in WebUI, so this module uses the excellent
+[KsuWebUIStandalone](https://github.com/5ec1cff/KsuWebUIStandalone) app by 5ec1cff.
+It works with Magisk, KernelSU and APatch. After installing the module it appears in the app's list.
 
-| Файл | Назначение |
+You can:
+
+- switch profiles with one tap;
+- enable/disable individual packages — choices survive reboot via `custom.txt`;
+- tap ★ to add a package to the whitelist forever;
+- enable dry-run and inspect the log;
+- run the scanner and read its report inside the page;
+- restore everything with the **Restore all** button (press twice to confirm).
+
+The page is fully local (`webroot/index.html`), needs no internet and sends no telemetry.
+Commands go through `scripts/webui.sh`, which only accepts known package names.
+
+## Files and manual control
+
+User files live in `/data/adb/hyperos_debloater`:
+
+| File | Purpose |
 |---|---|
-| `profile` | имя активного профиля (`safe`, `balanced`, `aggressive`) |
-| `whitelist.txt` | пакеты, которые нельзя трогать |
-| `custom.txt` | пакеты, отключённые вручную через WebUI (переживают перезагрузку) |
-| `applied.txt` | пакеты, отключённые модулем (используется для возврата) |
-| `log.txt` | журнал всех действий с датой и временем |
-| `dry-run` | если файл существует — отключение не применяется, только лог |
+| `profile` | active profile: `safe`, `balanced` or `aggressive` |
+| `whitelist.txt` | packages the module must never touch |
+| `custom.txt` | packages disabled manually in WebUI (survive reboot) |
+| `applied.txt` | packages disabled by the module (used for restore) |
+| `log.txt` | timestamped action log |
+| `dry-run` | if present, nothing is disabled — only logged |
 
-Примеры команд (Termux, root):
+Examples in Termux with root:
 
 ```sh
-# Посмотреть, какие кандидаты вообще есть на устройстве
+# See which known packages are actually installed
 su -c 'sh /data/adb/modules/hyperos_debloater/scripts/scan.sh'
-# Отчёт появится в /sdcard/Download/hyperos-debloater-packages.txt
+# Report: /sdcard/Download/hyperos-debloater-packages.txt
 
-# Включить сухой прогон и применить
+# Dry run
 su -c 'touch /data/adb/hyperos_debloater/dry-run'
 su -c 'sh /data/adb/modules/hyperos_debloater/scripts/apply.sh'
 cat /data/adb/hyperos_debloater/log.txt
-
-# Вернуть сухой прогон обратно
 su -c 'rm /data/adb/hyperos_debloater/dry-run'
 
-# Выбрать профиль вручную и применить
+# Select a profile manually
 su -c 'echo balanced > /data/adb/hyperos_debloater/profile'
 su -c 'sh /data/adb/modules/hyperos_debloater/scripts/apply.sh'
 
-# Всё вернуть, не удаляя модуль
+# Restore everything without uninstalling
 su -c 'sh /data/adb/modules/hyperos_debloater/scripts/restore.sh'
 ```
 
-## Поддерживаемые устройства
+## Supported devices
 
-Любые устройства на HyperOS 1.x/2.x и MIUI 12+. Разработка и тестирование идут на
-Redmi Note 12 (`tapas`, Snapdragon 685, Android 15 / HyperOS 2.0). На AOSP-подобных
-прошивках модуль просто не находит пакеты Xiaomi и ничего не меняет.
+Any HyperOS 1.x/2.x or MIUI 12+ device. Developed and tested on a Redmi Note 12
+(`tapas`, Snapdragon 685, Android 15 / HyperOS 2.0). On AOSP-like ROMs the module
+finds no Xiaomi packages and does nothing.
 
-## Вопросы
+## FAQ
 
-**Сломался экран/лаунчер?** Открой Magisk → отключи модуль — при удалении все пакеты
-включаются обратно. Если не перезагружается, в recovery удали
-`/data/adb/modules/hyperos_debloater`.
+**Something broke (launcher, lockscreen)?** Disable or uninstall the module in Magisk —
+all packages are re-enabled. If the phone will not boot, delete
+`/data/adb/modules/hyperos_debloater` from recovery.
 
-**Модуль ничего не отключил.** Запусти `scan.sh`: возможно, на твоей прошивке другие
-имена пакетов. Пришли отчёт в issue — добавим профиль под твою прошивку.
+**The log says `DISABLE FAIL` or `RESTORE FAIL`.** Update to v1.1.1 first: the module now
+waits for PackageManager after boot, retries and logs the real `pm` error as
+`PM DISABLE FAIL ...`. If it still fails, open an issue with that line from `log.txt`.
 
-**Можно ли редактировать профили?** Да, но правильнее добавить нужный пакет в
-`whitelist.txt`: он сохранится при обновлении модуля.
+**Can I edit profiles?** Yes, but adding a package to `whitelist.txt` is safer — whitelist
+entries survive module updates.
 
 ## Roadmap
 
-- [x] WebUI с чекбоксами пакетов (Magisk/KernelSU/APatch через KsuWebUI) — с 1.1.0
-- [ ] Профили под конкретные регионы (Global / CN / EEA / RU)
-- [ ] Обновляемый список кандидатов через `update.json`
-- [ ] Уведомление после применения профиля
+- [x] WebUI with package toggles (Magisk / KernelSU / APatch via KsuWebUI)
+- [ ] Region-specific profiles (Global / CN / EEA / RU)
+- [ ] Community-maintained candidate list via `update.json`
+- [ ] Notification after applying a profile
 
-## Disclaimer
-
-Модуль меняет состояние системных пакетов. Делай бэкап. Автор не несёт ответственности
-за последствия. Это open source — читай код перед установкой.
-
-## Сборка
+## Build
 
 ```sh
 sh scripts/build.sh          # → hyperos-debloater.zip
 ```
 
-Репозиторий: `github.com/bellowname/hyperos-debloater`. Если логин изменится,
-поправь его в `module/module.prop`, `update.json`, бейджах README и `LICENSE`.
+Before releasing, replace `bellowname` in `module/module.prop`, `update.json`,
+README badges and `LICENSE` with your GitHub username.
+
+## Contributing
+
+Package names differ between regions and ROMs. Run `scan.sh`, attach the report to an
+issue, and read [CONTRIBUTING.md](CONTRIBUTING.md) before sending a PR.
+
+## Disclaimer
+
+This module changes the enabled state of system packages. Make a backup. The author is
+not responsible for consequences. It is open source — read the code before installing.
 
 ## License
 
-MIT. Свои пакеты и профили присылай через [CONTRIBUTING.md](CONTRIBUTING.md).
-Если модуль помог — поставь ⭐, это главная мотивация обновлять его.
+MIT. If this helped you, a ⭐ on GitHub is the best motivation to keep updating it.
