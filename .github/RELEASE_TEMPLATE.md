@@ -11,7 +11,7 @@
 ## Tested on
 
 - Device: Redmi Note 12 (`tapas`)
-- ROM: HyperOS 2.0.209.0
+- ROM: HyperOS 2.0.209.0, Global region (reported by the author)
 - Android: 15
 - Root manager: Magisk
 

@@ -50,8 +50,9 @@ Only the following has been verified by the author. Everything else is marked as
 |---|---|---|
 | Device | Redmi Note 12, codename `tapas` | Verified |
 | HyperOS | 2.0.209.0 | Verified |
+| ROM region | Global (reported by the author, not strictly verified) | No region-specific profiles yet |
 | Android | 15 | Verified |
-| Root / module format | Magisk | Verified on v1.1.1 |
+| Root / module format | Magisk | Verified on v1.1.1; no other root solution was available for testing |
 | KernelSU | **Requires testing** | Uses Magisk-style scripts; not verified by the author |
 | APatch | **Requires testing** | Uses Magisk-style scripts; not verified by the author |
 | WebUI host | KsuWebUI Standalone | Required; the app itself supports Magisk / KernelSU / APatch |

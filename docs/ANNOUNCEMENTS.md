@@ -3,6 +3,9 @@
 No stars-for-favors, no mass posting, no fake reviews. Post once per community, adapt
 the text to its rules, and answer questions in the thread.
 
+Priority channels reported by the author: **Telegram and TikTok** (sections 4 and 5).
+XDA / Reddit / 4PDA drafts are kept as optional backups if those communities are used later.
+
 ## 1. XDA (technical)
 
 **Title:** `[MODULE] HyperOS Debloater — reversible pm disable-user profiles + WebUI for Xiaomi/Redmi/POCO`
@@ -91,7 +94,7 @@ HyperOS Debloater v1.1.1 — модуль для Xiaomi/Redmi/POCO с root.
 
 Отключает рекламу и аналитику через pm disable-user, не удаляя приложения.
 Есть профили safe / balanced / aggressive, whitelist, dry-run и офлайн-WebUI через KsuWebUI Standalone.
-При удалении модуля всё включется обратно.
+При удалении модуля всё включается обратно.
 
 Проверено на Redmi Note 12, HyperOS 2.0, Android 15, Magisk. KernelSU/APatch пока не проверены.
 Не обещает ускорение и не скрывает root. Делай бэкап, сначала используй dry-run.
@@ -99,4 +102,18 @@ HyperOS Debloater v1.1.1 — модуль для Xiaomi/Redmi/POCO с root.
 https://github.com/bellowname/hyperos-debloater
 ```
 
-Fix typo "включется" -> "включается" before write? I already wrote with typo in content string. Need edit after. Let's fix<tool_call:6124c78e>edit<arg_key:6124c78e>path</arg_key:6124c78e><arg_value:6124c78e>/storage/emulated/0/Documents/hyperos-debloater/docs/ANNOUNCEMENTS.md
+## 5. TikTok (короткий ролик / описание)
+
+**Caption:**
+
+> HyperOS Debloater: отключает рекламу и аналитику Xiaomi через `pm disable-user`, не удаляя приложения. Профили safe / balanced / aggressive, whitelist, dry-run и откат при удалении модуля. Root обязателен. Ссылка на GitHub в био / в комментарии. Делай бэкап, сначала dry-run.
+
+**Сценарий на 20–25 секунд (без обещаний ускорения):**
+
+1. 0–3 с — экран телефона с рекламой/рекомендациями в HyperOS. Текст: «Надоела реклама?»
+2. 3–8 с — WebUI KsuWebUI: карточки профилей и список пакетов. Текст: «Не удаляем — отключаем через pm disable-user».
+3. 8–14 с — включить dry-run, показать строки `DRY-RUN disable ...` в логе. Текст: «Сначала смотрим, что будет».
+4. 14–19 с — нажать «Всё вернуть» или показать `restore.sh`. Текст: «Всё можно вернуть обратно».
+5. 19–25 с — плашка: «Root обязателен · Magisk проверен · KSU/APatch не проверены · бэкап · dry-run · ссылка в описании».
+
+Не публикуй как «ускорение в 2 раза» или «без root»: это неправда. Постим один раз, без массовой рассылки.<tool_call:6124c78e>edit<arg_key:6124c78e>path</arg_key:6124c78e><arg_value:6124c78e>/storage/emulated/0/Documents/hyperos-debloater/docs/ANNOUNCEMENTS.md

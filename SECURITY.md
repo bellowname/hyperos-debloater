@@ -16,15 +16,18 @@ a strict pattern.
 
 This is still a root module: install only from trusted sources and read the code.
 
-## Reporting a vulnerability
+## Where to report
 
-Please **do not** post a working exploit publicly.
+- **Ordinary bugs and feature requests:** GitHub **Issues** on this repository. Use the
+  bug report or feature request template and attach `log.txt` / `scan.sh` output.
+- **Suspected vulnerabilities:** GitHub's private vulnerability reporting
+  (**Security → Report a vulnerability**) if it is available. No public email address
+  is published for this project.
 
-1. Use GitHub's private vulnerability reporting on this repository
-   (**Security → Report a vulnerability**) if it is available.
-2. If it is not available, open a minimal issue titled `[Security] ...` with a short
-   description **without reproduction steps** and wait for a maintainer reply.
-3. Include: module version, root solution, device/ROM, and which file or command is affected.
+Please **do not** post a working exploit publicly. If private reporting is unavailable,
+open a minimal issue titled `[Security] ...` with a short description **without
+reproduction steps** and wait for a maintainer reply. Include: module version, root
+solution, device/ROM, and which file or command is affected.
 
 Expected response time: best effort, usually within a few days.
 
