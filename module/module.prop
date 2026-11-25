@@ -1,0 +1,7 @@
+id=hyperos_debloater
+name=HyperOS Debloater (Safe Profiles)
+version=1.0.0
+versionCode=100
+author=bellowname
+description=Безопасное отключение рекламы, аналитики и лишних сервисов Xiaomi/Redmi/Poco. Профили, whitelist, сухой прогон и полный возврат при удалении.
+updateJson=https://raw.githubusercontent.com/bellowname/hyperos-debloater/main/update.json

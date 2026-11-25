@@ -1,0 +1,18 @@
+# Пакеты, которые модуль НИКОГДА не трогает, даже если они есть в профиле.
+# Свои исключения добавляй сюда по одному пакету в строку.
+
+com.miui.home
+com.miui.keyguard
+com.miui.securitycenter
+com.miui.securitycore
+com.miui.theme
+com.miui.backup
+com.miui.face
+com.miui.gallery
+com.miui.notes
+com.miui.calculator
+com.mipay.wallet
+com.xiaomi.payment
+com.xiaomi.finddevice
+com.xiaomi.smarthome
+com.google.android.gms

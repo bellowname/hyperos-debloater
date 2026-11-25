@@ -1,0 +1,9 @@
+# SAFE — только реклама, аналитика и мусорные страницы.
+# Самый консервативный профиль. Запускается по умолчанию.
+# Пакеты, которых нет на устройстве, пропускаются без ошибки.
+
+com.miui.analytics
+com.miui.systemAdSolution
+com.miui.msa.global
+com.miui.yellowpage
+com.miui.bugreport

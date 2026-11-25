@@ -1,0 +1,19 @@
+# BALANCED — safe + магазины/браузер/видео/зеркало экрана.
+# Если ты пользуется GetApps или встроенным браузером — добавь их в whitelist.
+
+com.miui.analytics
+com.miui.systemAdSolution
+com.miui.msa.global
+com.miui.yellowpage
+com.miui.bugreport
+
+com.android.browser
+com.miui.browser
+com.xiaomi.mipicks
+com.miui.market
+com.xiaomi.shop
+com.miui.videoplayer
+com.miui.video
+com.xiaomi.mirror
+com.xiaomi.scanner
+com.miui.hybrid

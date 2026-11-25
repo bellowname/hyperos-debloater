@@ -1,0 +1,29 @@
+# AGGRESSIVE — всё из balanced + «умные» сервисы, AOD, обои, голосовой помощник.
+# ВНИМАНИЕ: joyose и powerkeeper влияют на игровые профили и энергосбережение.
+# Если что-то пошло не так — нажми Action ещё раз (вернёшься к safe) или удали модуль.
+
+com.miui.analytics
+com.miui.systemAdSolution
+com.miui.msa.global
+com.miui.yellowpage
+com.miui.bugreport
+
+com.android.browser
+com.miui.browser
+com.xiaomi.mipicks
+com.miui.market
+com.xiaomi.shop
+com.miui.videoplayer
+com.miui.video
+com.xiaomi.mirror
+com.xiaomi.scanner
+com.miui.hybrid
+
+com.xiaomi.joyose
+com.xiaomi.discover
+com.miui.aod
+com.miui.miwallpaper
+com.miui.voiceassist
+com.miui.powerkeeper
+com.miui.luckymoney
+com.miui.gamebooster

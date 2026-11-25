@@ -1,0 +1,38 @@
+name: Сообщение о проблеме
+description: Что-то отключилось не так или модуль не работает
+title: "[Bug]: "
+labels: [bug]
+body:
+  - type: input
+    id: device
+    attributes:
+      label: Устройство и прошивка
+      placeholder: Redmi Note 12 (tapas), HyperOS 2.0.209, Android 15
+    validations:
+      required: true
+  - type: input
+    id: profile
+    attributes:
+      label: Активный профиль
+      placeholder: safe / balanced / aggressive
+    validations:
+      required: true
+  - type: textarea
+    id: what
+    attributes:
+      label: Что случилось
+      description: Что перестало работать и когда
+    validations:
+      required: true
+  - type: textarea
+    id: log
+    attributes:
+      label: Содержимое /data/adb/hyperos_debloater/log.txt
+      render: shell
+    validations:
+      required: false
+  - type: textarea
+    id: report
+    attributes:
+      label: Отчёт scan.sh (если есть)
+      render: shell

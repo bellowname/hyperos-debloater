@@ -1,0 +1,25 @@
+name: Предложение пакета или профиля
+description: Добавить пакет в список или предложить свой профиль
+title: "[Feature]: "
+labels: [enhancement]
+body:
+  - type: input
+    id: rom
+    attributes:
+      label: Устройство / ROM / регион
+      placeholder: Poco X5 Pro, HyperOS 2.0 EEA Global
+    validations:
+      required: true
+  - type: textarea
+    id: packages
+    attributes:
+      label: Имена пакетов и что они делают
+      placeholder: com.example.ads — показывает рекламу в шторке
+    validations:
+      required: true
+  - type: textarea
+    id: why
+    attributes:
+      label: Почему это безопасно отключать
+    validations:
+      required: false
